@@ -23,7 +23,7 @@ Prerequisites:
 
 
 # Sreenshots:
-Screenshots\HusqvarnaAPI.png
+![Demo](Screenshots\HusqvarnaAPI.png)
 
 
 

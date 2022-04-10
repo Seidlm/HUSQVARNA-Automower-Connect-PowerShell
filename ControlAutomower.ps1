@@ -224,7 +224,7 @@ Send-MowerCommand -Command Park -MowerID $MowerID -Duration 10
 Send-MowerCommand -Command ParkUntilFurtherNotice -MowerID $MowerID 
 
 
-# Staert Mower with Schedule
+# Start Mower with Schedule
 Send-MowerCommand -Command ResumeSchedule -MowerID $MowerID
 
 #Start Mower for 10 Minutes, outside Shedule

@@ -2,8 +2,8 @@
 # Name: ControlAutomower.ps1                              
 # Creator: Michael Seidl aka Techguy                    
 # CreationDate: 23.06.2020
-# LastModified: 23.06.2020
-# Version: 1.0
+# LastModified: 10.04.2022
+# Version: 1.1
 # Doc: 
 # PSVersion tested:
 #
@@ -19,11 +19,11 @@
 # PowerShell Self Service Web Portal at www.au2mator.com/PowerShell
 
 #region Variables
-$APIKey = "00000000000000000000000000"
-$APISecret = "00000000000000000000000000"
+$APIKey = "APIKEY"
+$APISecret = "APISECRET"
 
-$Username = "your Mail"
-$Password = "your Password"
+$Username = "Mail"
+$Password = "Password"
 
 $OAuthURL = "https://api.authentication.husqvarnagroup.dev/v1/oauth2/token"
 #endregion Variables
@@ -64,14 +64,15 @@ $params2 = @{
 }
 $Result = Invoke-RestMethod @params2
 
-$MowerID=$Result.data.id
+$MowerID = $Result.data.id
 #endregion GetMowerID
+
 
 
 Function Send-MowerCommand {
 
     Param(
-        [ValidateSet("Start", "Pause", "Park", "ResumeSchedule","ParkUntilNextSchedule","ParkUntilFurtherNotice")]
+        [ValidateSet("Start", "Pause", "Park", "ResumeSchedule", "ParkUntilNextSchedule", "ParkUntilFurtherNotice")]
         [parameter(Mandatory = $true)]
         [String]
         $Command,
@@ -134,10 +135,10 @@ Function Send-MowerCommand {
     if ($Command -eq "Start") {
         $Body = @{
             'data' = @{
-                'type' = 'Start'
-                'attributes'  = @{
+                'type'       = 'Start'
+                'attributes' = @{
                     'duration' = $Duration
-                  }
+                }
             }
         } | ConvertTo-Json
     }
@@ -145,10 +146,10 @@ Function Send-MowerCommand {
     if ($Command -eq "Park") {
         $Body = @{
             'data' = @{
-                'type' = 'Park'
-                'attributes'  = @{
+                'type'       = 'Park'
+                'attributes' = @{
                     'duration' = $Duration
-                  }
+                }
             }
         } | ConvertTo-Json
     }
@@ -177,11 +178,51 @@ Function Send-MowerCommand {
 }
 
 
+Function Get-MowerInfo {
+    Param(
+        [parameter(Mandatory = $false)]
+        [string]
+        $MowerID
+    )
 
 
+    $Uri = "https://api.amc.husqvarna.dev/v1/mowers/$MowerID"
+
+    $params = @{
+  
+        Headers = @{
+            'accept'                 = "*/*"
+            'authorization'          = "Bearer $($token.access_token)"
+            'X-Api-Key'              = "$Apikey"
+            'Authorization-Provider' = 'husqvarna'
+            'Content-Type'           = 'application/vnd.api+json'
+        }
+        Method  = 'Get'
+        URI     = $Uri
+
+
+ 
+
+    }
+    $Result= Invoke-RestMethod @params
+    return $Result.data.attributes
+}
+
+
+
+
+#Get MowerInfo
+Get-MowerInfo -MowerID $MowerID
 
 # Pause Mower
 Send-MowerCommand -Command Pause -MowerID $MowerID
+
+# Park Mower for 10 Minutes
+Send-MowerCommand -Command Park -MowerID $MowerID -Duration 10
+
+# Park Mower for 10 Minutes
+Send-MowerCommand -Command ParkUntilFurtherNotice -MowerID $MowerID 
+
 
 # Staert Mower with Schedule
 Send-MowerCommand -Command ResumeSchedule -MowerID $MowerID
